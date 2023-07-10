@@ -1,0 +1,165 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's The Weather Today?</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+</head>
+<body>
+    <div class="header">
+        <div class="weather-title">
+            <h1 class="title">What's The Weather?</h1>
+        </div>
+        <div class="calender">
+            <div class="left">
+                <p id="date">01</p>
+                <p id="day">Sunday</p>
+            </div>
+            <div class="right">
+                <p id="month">January</p>
+                <p id="year">2023</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="enter city name"
+            spellcheck="false">
+            <button><img src="images/search.png"></button>
+        </div>
+        <div class="error">
+            <P>Invalid City Name</P>
+        </div>
+        <div class="weather">
+            <img src="images/rain.png" class="weather-icon">
+            <h1 class="temp">69°F</h1>
+            <h2 class="city">Westwood</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind.png" alt="">
+                    <div>
+                        <p class="wind">50 mph</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clock">
+        <h1 id="current-time"></h1>
+        <div class="dad-jokes">
+            <p id="joke">To whoever stole my copy of Microsoft Office, I will find you. You have my Word!</p>
+            <button class="joke-button" id="joke-button">New Joke</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKeyWeather = "3d9e795e97ab001df8aee4c0d0efd0b8"
+        const apiURLWeather = "https://api.openweathermap.org/data/2.5/weather?units=imperial&q="
+
+        const searchBox = document.querySelector(".search input")
+        const searchBtn = document.querySelector(".search button")
+        const weatherIcon = document.querySelector(".weather-icon")
+
+        async function checkWeather(city) {
+            const response = await fetch(apiURLWeather + city + `&appid=${apiKeyWeather}`)
+
+            if(response.status == 404) {
+                document.querySelector(".error").style.display = "block"
+                document.querySelector(".weather").style.display = "none"
+            } else {
+                var data = await response.json()
+
+                document.querySelector(".city").innerHTML = data.name
+                document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°F"
+                document.querySelector(".humidity").innerHTML = data.main.humidity + "%"
+                document.querySelector(".wind").innerHTML = data.wind.speed + " km/h"
+
+                if(data.weather[0].main == "Clouds") {
+                    weatherIcon.src = "images/clouds.png"
+                }
+                else if(data.weather[0].main == "Clear") {
+                    weatherIcon.src = "images/clear.png"
+                }
+                else if(data.weather[0].main == "Rain") {
+                    weatherIcon.src = "images/rain.png"
+                }
+                else if(data.weather[0].main == "Drizzle") {
+                    weatherIcon.src = "images/drizzle.png"
+                }
+                else if(data.weather[0].main == "Mist") {
+                    weatherIcon.src = "images/mist.png"
+                }
+
+                document.querySelector(".weather").style.display = "block"
+                document.querySelector(".error").style.display = "none"
+
+            }
+
+        }
+        searchBtn.addEventListener("click", ()=> {
+            checkWeather(searchBox.value)
+        })
+
+        let time = document.getElementById("current-time")
+
+        setInterval(() => {
+        let d = new Date()
+        time.innerHTML = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+
+        const date = document.getElementById("date")
+        const day = document.getElementById("day")
+        const month = document.getElementById("month")
+        const year = document.getElementById("year")
+
+        const today = new Date()
+        const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday"]
+        const allMonths = ["January", "February", "March", "April", "May",
+        "June", "July", "August", "September", "October", "November", "December"]
+        date.innerHTML = (today.getDate()<10?"0":"") + today.getDate()
+        day.innerHTML = weekDays[today.getDay()]
+        month.innerHTML = allMonths[today.getMonth()]
+        year.innerHTML = today.getFullYear()
+    }, 1000);
+
+    const jokeButton = document.getElementById("joke-button")
+    const jokeHolder = document.getElementById("joke")
+
+    const apiKeyJokes = "bXOthnfBmxfEEsC2AxcoAw==wGhII7pw0EXB92ui"
+
+    const options = {
+        method: 'GET',
+        headers: {
+            "X-Api-Key": apiKeyJokes,
+        },
+    };
+
+    const apiURLJokes = "https://api.api-ninjas.com/v1/jokes?limit=1"
+
+    async function getJokes() {
+        jokeHolder.innerText = "Updating..."
+        jokeButton.disabled = true
+        jokeButton.innerText = "Loading..."
+        const response = await fetch(apiURLJokes, options)
+        const data = await response.json()
+
+        jokeButton.disabled = false
+        jokeButton.innerText = "New Joke"
+
+        jokeHolder.innerText = data[0].joke
+    }
+    
+    jokeButton.addEventListener("click", getJokes)
+
+    </script>
+</body>
+</html>
